@@ -191,10 +191,23 @@ class VertexAIPartnerModelsAnthropicMessagesConfig(AnthropicMessagesConfig, Vert
             last_block = content[-1]
             if isinstance(last_block, dict):
                 last_block["cache_control"] = {"type": "ephemeral"}
-                verbose_logger.debug(
-                    "VertexAI Anthropic Messages: Injected cache_control to last "
-                    "content block of last message for prompt caching"
+            elif isinstance(last_block, str):
+                # Normalize non-dict block into standard content block format
+                content[-1] = {
+                    "type": "text",
+                    "text": last_block,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            else:
+                verbose_logger.warning(
+                    "VertexAI Anthropic Messages: Last content block is not a "
+                    "dict or string, cannot inject cache_control"
                 )
+                return
+            verbose_logger.debug(
+                "VertexAI Anthropic Messages: Injected cache_control to last "
+                "content block of last message for prompt caching"
+            )
         elif isinstance(content, str):
             # For string content, convert to list format with cache_control
             last_message["content"] = [

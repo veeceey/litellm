@@ -283,6 +283,28 @@ class TestVertexAICacheControlInjection:
         last_block = result_messages[-1]["content"][-1]
         assert last_block["cache_control"] == {"type": "ephemeral"}
 
+    def test_cache_control_injected_to_non_dict_list_content(self):
+        """Test that non-dict last content blocks (strings in a list) are normalized."""
+        config = VertexAIPartnerModelsAnthropicMessagesConfig()
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "First block"},
+                    "Plain string as last block",
+                ],
+            },
+        ]
+
+        config._inject_cache_control_to_last_message(messages)
+
+        last_block = messages[-1]["content"][-1]
+        # Should be normalized to a dict with cache_control
+        assert isinstance(last_block, dict), "Non-dict block should be normalized to dict"
+        assert last_block["type"] == "text"
+        assert last_block["text"] == "Plain string as last block"
+        assert last_block["cache_control"] == {"type": "ephemeral"}
+
     def test_cache_control_with_empty_messages(self):
         """Test that empty messages list doesn't cause errors."""
         config = VertexAIPartnerModelsAnthropicMessagesConfig()
