@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from litellm._logging import verbose_logger
 from litellm.llms.anthropic.common_utils import AnthropicModelInfo
@@ -57,16 +57,16 @@ class VertexAIPartnerModelsAnthropicMessagesConfig(AnthropicMessagesConfig, Vert
             )
 
         headers["content-type"] = "application/json"
-        
+
         # Add beta headers for Vertex AI
         tools = optional_params.get("tools", [])
         beta_values: set[str] = set()
-        
+
         # Get existing beta headers if any
         existing_beta = headers.get("anthropic-beta")
         if existing_beta:
             beta_values.update(b.strip() for b in existing_beta.split(","))
-        
+
         # Use the helper to remove unsupported beta headers
         self.remove_unsupported_beta(headers)
         beta_values.discard(ANTHROPIC_PROMPT_CACHING_SCOPE_BETA_HEADER)
@@ -76,15 +76,15 @@ class VertexAIPartnerModelsAnthropicMessagesConfig(AnthropicMessagesConfig, Vert
             if isinstance(tool, dict) and tool.get("type", "").startswith(ANTHROPIC_HOSTED_TOOLS.WEB_SEARCH.value):
                 beta_values.add(ANTHROPIC_BETA_HEADER_VALUES.WEB_SEARCH_2025_03_05.value)
                 break
-        
+
         # Check for tool search tools - Vertex AI uses different beta header
         anthropic_model_info = AnthropicModelInfo()
         if anthropic_model_info.is_tool_search_used(tools):
             beta_values.add(get_tool_search_beta_header("vertex_ai"))
-        
+
         if beta_values:
             headers["anthropic-beta"] = ",".join(beta_values)
-        
+
         return headers, api_base
 
     def get_complete_url(
@@ -208,7 +208,7 @@ class VertexAIPartnerModelsAnthropicMessagesConfig(AnthropicMessagesConfig, Vert
                 "VertexAI Anthropic Messages: Converted string content to list "
                 "and injected cache_control for prompt caching"
             )
-    
+
     def remove_unsupported_beta(self, headers: dict) -> None:
         """
         Helper method to remove unsupported beta headers from the beta headers.
