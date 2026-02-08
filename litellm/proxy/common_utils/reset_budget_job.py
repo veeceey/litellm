@@ -88,6 +88,9 @@ class ResetBudgetJob:
 
             if budgets_to_reset is not None and len(budgets_to_reset) > 0:
                 for budget in budgets_to_reset:
+                    # Reset spend to 0
+                    budget.spend = 0.0
+                    # Update budget_reset_at to next reset time
                     budget = await ResetBudgetJob._reset_budget_reset_at_date(
                         budget, now
                     )
